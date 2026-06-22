@@ -1,110 +1,50 @@
-[Glassdoor Scraper](https://apify.com/vivid_astronaut/glassdoor-scraper?fpr=data)
+[Glassdoor Scraper](https://apify.com/ahmed_jasarevic/glassdoor-scraper?fpr=data)
 
-Glassdoor Scraper service powered by Azure. Fast, reliable, and scalable API.
+# Glassdoor Scraper Pro 🚀
 
-## Features
+A high-performance, production-ready Apify Actor designed to extract comprehensive data from Glassdoor.com while bypassing aggressive anti-bot protections.
 
-- **Fast Processing**: Lightning-fast glassdoor scraper api powered by Azure
-- **Reliable**: 99.9% uptime with automatic failover
-- **Scalable**: Handle single requests or bulk operations
-- **Secure**: Enterprise-grade security with API key authentication
-- **Well Documented**: Comprehensive API documentation and examples
+## ✨ Key Features
 
-## Use Cases
+- **🛡️ Anti-Bot & Cloudflare Bypass**: Specialized Playwright Stealth engine.
+- **🍪 Automated Session Persistence (New!)**: Save your session once, and the Actor remembers it for next time!
+- **🛡️ Hidden Data Recovery**: Extracts "blurred" reviews and hidden text.
+- **📡 Hybrid Extraction Engine**:
 
-- **Development**: Integrate into your development workflow
-- **Automation**: Build automated pipelines
-- **Integration**: Connect with other services
+- **GraphQL Interception**: Captures high-fidelity JSON data directly from internal API calls.
+- **DOM Recovery**: Intelligent fallback that scrapes visible cards, including **Blurred/Hidden** review text.
+- **💾 Real-time Results**: Results appear in the dataset instantly as they are scraped.
 
-## Input Parameters
+## 🍪 Mandatory Cookie Setup (Cloud Success)
 
-| Parameter | Type | Required | Description |
-| --- | --- | --- | --- |
-| `data` | object | No | Input data to process. Send your API request payload here. |
-| `endpoint` | string | No | Specific endpoint to call (e.g., /api/v1/process) |
+To bypass Glassdoor's Cloudflare protection on the Apify Platform, you **must** provide fresh cookies from your own logged-in browser session.
 
-## Output Format
+### How to get your cookies:
 
-```
-{
-  "success": true,
-  "result": { ... },
-  "timestamp": "2026-01-07T00:00:00Z"
-}
-```
+1. Open Glassdoor in your browser and ensure you are logged in.
+2. Use a browser extension like **"EditThisCookie"** or **"JSON Cookie"** to export your cookies as a JSON array.
+3. Alternatively, open **Developer Tools (F12)** -> **Network** tab -> Refresh -> Right-click any request -> **Copy** -> **Copy as JSON**.
+4. Paste the JSON array into the **`cookies`** input field in the Apify Console.
 
-## Code Examples
+> [!TIP]
+> You only need to provide cookies **once**! After the first successful run, the Actor will automatically save its session state. Subsequent runs will load this saved session from the Key-Value Store.
 
-### JavaScript (Node.js)
+## ⚙️ Configuration
 
-```
-import { ApifyClient } from 'apify-client';
+| Field | Type | Description |
+| --- | --- | --- |
+| `startUrls` | Array | List of Glassdoor URLs (Reviews, Jobs, etc.) |
+| `maxItems` | Number | Maximum items to collect per URL (Default: 100) |
+| `command` | String | Data type to target: `reviews`, `jobs`, `salaries` |
+| `cookies` | Array | Your session cookies (JSON format) |
+| `proxy` | Object | **MANDATORY**: Use Residential Proxy for Cloud runs. |
 
-const client = new ApifyClient({ token: 'YOUR_API_TOKEN' });
+## 📦 Output
 
-const input = {
-  "data": {},
-  "endpoint": "/api/v1/process"
-};
+Data is saved to `storage/datasets/default/`. Each record includes:
 
-const run = await client.actor("vivid_astronaut/glassdoor-scraper").call(input);
-const { items } = await client.dataset(run.defaultDatasetId).listItems();
-console.log(items);
-```
-
-### Python
-
-```
-from apify_client import ApifyClient
-
-client = ApifyClient("YOUR_API_TOKEN")
-
-run_input = {
-  "data": {},
-  "endpoint": "/api/v1/process"
-}
-
-run = client.actor("vivid_astronaut/glassdoor-scraper").call(run_input=run_input)
-
-for item in client.dataset(run["defaultDatasetId"]).iterate_items():
-    print(item)
-```
-
-### cURL
-
-```
-curl -X POST "https://api.apify.com/v2/acts/vivid_astronaut~glassdoor-scraper/runs?token=YOUR_API_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-  "data": {},
-  "endpoint": "/api/v1/process"
-}'
-```
-
-## Pricing
-
-**Model**: Pay per result
-**Price**: $0.010 per result
-
-You only pay for successful results. Platform usage costs are included.
-
-## API Documentation
-
-Full API documentation is available at:
-
-- [Apify API Reference](https://docs.apify.com/api/v2)
-- [Actor API Endpoints](https://docs.apify.com/api/v2#/reference/actors)
-
-## Support
-
-- **Issues**: Report bugs via Apify Console
-- **Documentation**: [Apify Docs](https://docs.apify.com)
-- **Community**: [Apify Discord](https://discord.gg/apify)
-
-## Version History
-
-See ./CHANGELOG.md for version history.
-
----
-
-*Powered by Azure Cloud Infrastructure*
+- Review ID & Summary
+- Pros & Cons (Full Text)
+- Ratings (Overall & Sub-ratings)
+- Metadata (Date, Location, Job Title)
+- `_source`: Traceability for where the data was captured (GraphQL vs DOM)
