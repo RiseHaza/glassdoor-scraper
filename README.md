@@ -1,131 +1,110 @@
-[Glassdoor Scraper](https://apify.com/swerve/glassdoor-scraper?fpr=data)
+[Glassdoor Scraper](https://apify.com/vivid_astronaut/glassdoor-scraper?fpr=data)
 
-# Glassdoor Job Scraper
+Glassdoor Scraper service powered by Azure. Fast, reliable, and scalable API.
 
-Scrape job listings from [Glassdoor](https://www.glassdoor.com) with salary estimates, company ratings, full job descriptions, and more. Supports 21 countries with automatic domain health checks and fallback.
+## Features
 
-## Why This Scraper?
-
-- **Salary data that Glassdoor hides** -- estimated salary range (min, median, max) for each listing, extracted from Glassdoor's internal data
-- **Full job descriptions** -- optionally fetch the complete description for every listing (enable `fetchDescriptions`)
-- **21 countries** -- dedicated Glassdoor domains for US, UK, Canada, Germany, Australia, and more
-- **Smart fallback** -- if a country domain is temporarily down, the scraper automatically falls back to glassdoor.com so your run still produces results
-- **In-browser location resolution** -- your location filter is resolved to Glassdoor's internal location ID for accurate results
-- **Rich filtering** -- filter by job type, date posted, remote-only, and minimum salary
+- **Fast Processing**: Lightning-fast glassdoor scraper api powered by Azure
+- **Reliable**: 99.9% uptime with automatic failover
+- **Scalable**: Handle single requests or bulk operations
+- **Secure**: Enterprise-grade security with API key authentication
+- **Well Documented**: Comprehensive API documentation and examples
 
 ## Use Cases
 
-- **Recruiters and staffing agencies** pulling fresh job postings across 21 countries to source leads, identify hiring companies, and benchmark against competitors
-- **HR and compensation analysts** using Glassdoor's hidden salary estimates to build pay bands and benchmark offers for specific roles and cities
-- **Job seekers and career coaches** monitoring new postings at target companies with custom filters (remote, fulltime, posted this week)
-- **Sales teams at HR tech vendors** generating leads by tracking which companies are hiring in high volume (signals growth/budget)
-- **Market researchers** studying labour demand trends, remote work share, and industry hiring shifts across US, UK, Germany, and more
-- **Competitive intelligence teams** tracking how competitors describe roles, benefits, and culture in live listings
+- **Development**: Integrate into your development workflow
+- **Automation**: Build automated pipelines
+- **Integration**: Connect with other services
 
-## Proxy Required
+## Input Parameters
 
-You **must** use Apify Proxy with the **RESIDENTIAL** group. Glassdoor will block requests from datacenter IPs.
-
-```
-{
-  "proxyConfig": {
-    "useApifyProxy": true,
-    "apifyProxyGroups": ["RESIDENTIAL"]
-  }
-}
-```
-
-## Input
-
-| Field | Type | Default | Description |
+| Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| `searchQuery` | string | *(required)* | Job search keywords (e.g. `"Product Manager"`) |
-| `location` | string |  | City or region to filter by (e.g. `"New York"`) |
-| `country` | string | `"us"` | Country code -- see supported list below |
-| `maxItems` | integer | `100` | Maximum number of listings to return (max 1000) |
-| `jobType` | string | `"all"` | One of: `all`, `fulltime`, `parttime`, `contract`, `internship`, `temporary` |
-| `datePosted` | integer |  | Only jobs posted within this many days: `1`, `3`, `7`, `14`, or `30` |
-| `remoteOnly` | boolean | `false` | Only return remote positions |
-| `minSalary` | number |  | Minimum salary filter |
-| `fetchDescriptions` | boolean | `false` | Fetch full job descriptions (slower but much richer data) |
-| `proxyConfig` | object |  | Proxy settings -- residential proxy required |
+| `data` | object | No | Input data to process. Send your API request payload here. |
+| `endpoint` | string | No | Specific endpoint to call (e.g., /api/v1/process) |
 
-## Supported Countries
-
-| Code | Country | Domain |
-| --- | --- | --- |
-| `us` | United States | glassdoor.com |
-| `uk` | United Kingdom | glassdoor.co.uk |
-| `canada` | Canada | glassdoor.ca |
-| `india` | India | glassdoor.co.in |
-| `australia` | Australia | glassdoor.com.au |
-| `germany` | Germany | glassdoor.de |
-| `france` | France | glassdoor.fr |
-| `netherlands` | Netherlands | glassdoor.nl |
-| `austria` | Austria | glassdoor.at |
-| `mexico` | Mexico | glassdoor.com.mx |
-| `brazil` | Brazil | glassdoor.com.br |
-| `belgium` | Belgium | glassdoor.be |
-| `switzerland` | Switzerland | glassdoor.ch |
-| `ireland` | Ireland | glassdoor.ie |
-| `singapore` | Singapore | glassdoor.sg |
-| `hong-kong` | Hong Kong | glassdoor.com.hk |
-| `new-zealand` | New Zealand | glassdoor.co.nz |
-| `israel` | Israel | glassdoor.co.il |
-| `italy` | Italy | glassdoor.it |
-| `spain` | Spain | glassdoor.es |
-| `sweden` | Sweden | glassdoor.se |
-
-> **Note:** Israel (`glassdoor.co.il`) is temporarily unavailable due to Glassdoor infrastructure issues. The scraper will automatically fall back to `glassdoor.com` when this domain is down.
-
-## Example Input
+## Output Format
 
 ```
 {
-  "searchQuery": "Product Manager",
-  "location": "New York",
-  "country": "us",
-  "maxItems": 50,
-  "fetchDescriptions": true,
-  "proxyConfig": {
-    "useApifyProxy": true,
-    "apifyProxyGroups": ["RESIDENTIAL"]
-  }
+  "success": true,
+  "result": { ... },
+  "timestamp": "2026-01-07T00:00:00Z"
 }
 ```
 
-## Sample Output
+## Code Examples
+
+### JavaScript (Node.js)
 
 ```
-{
-  "jobId": "1009428351674",
-  "url": "https://www.glassdoor.com/job-listing/product-manager-acme-corp-JV_IC1132348_KO0,15_KE16,25.htm?jl=1009428351674",
-  "jobTitle": "Product Manager",
-  "employerName": "Acme Corp",
-  "employerId": "28471",
-  "location": "New York, NY",
-  "jobType": "fulltime",
-  "isRemote": false,
-  "salaryMin": 120000,
-  "salaryMedian": 145000,
-  "salaryMax": 175000,
-  "salaryCurrency": "USD",
-  "salaryPeriod": "ANNUAL",
-  "datePosted": "2026-03-24",
-  "easyApply": true,
-  "sponsored": false,
-  "companyRating": 4.2,
-  "companySize": "1001 to 5000 Employees",
-  "companyIndustry": "Internet & Web Services",
-  "listingDescription": "We are looking for a Product Manager to lead our platform team...",
-  "scrapedAt": "2026-03-26T12:00:00.000Z"
+import { ApifyClient } from 'apify-client';
+
+const client = new ApifyClient({ token: 'YOUR_API_TOKEN' });
+
+const input = {
+  "data": {},
+  "endpoint": "/api/v1/process"
+};
+
+const run = await client.actor("vivid_astronaut/glassdoor-scraper").call(input);
+const { items } = await client.dataset(run.defaultDatasetId).listItems();
+console.log(items);
+```
+
+### Python
+
+```
+from apify_client import ApifyClient
+
+client = ApifyClient("YOUR_API_TOKEN")
+
+run_input = {
+  "data": {},
+  "endpoint": "/api/v1/process"
 }
+
+run = client.actor("vivid_astronaut/glassdoor-scraper").call(run_input=run_input)
+
+for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+    print(item)
 ```
 
-## How It Works
+### cURL
 
-The scraper uses Playwright (headless Chrome) to render Glassdoor pages, then extracts structured data from the Apollo GraphQL cache embedded in each page. This gives richer and more reliable data than HTML scraping alone.
+```
+curl -X POST "https://api.apify.com/v2/acts/vivid_astronaut~glassdoor-scraper/runs?token=YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+  "data": {},
+  "endpoint": "/api/v1/process"
+}'
+```
 
-## Keywords
+## Pricing
 
-Glassdoor scraper, Glassdoor jobs API, salary data scraper, job listings API, Glassdoor salary estimates, recruitment data, HR benchmarking tool, global job market data, Glassdoor companies, remote jobs scraper, glassdoor.com scraper, job posting data
+**Model**: Pay per result
+**Price**: $0.010 per result
+
+You only pay for successful results. Platform usage costs are included.
+
+## API Documentation
+
+Full API documentation is available at:
+
+- [Apify API Reference](https://docs.apify.com/api/v2)
+- [Actor API Endpoints](https://docs.apify.com/api/v2#/reference/actors)
+
+## Support
+
+- **Issues**: Report bugs via Apify Console
+- **Documentation**: [Apify Docs](https://docs.apify.com)
+- **Community**: [Apify Discord](https://discord.gg/apify)
+
+## Version History
+
+See ./CHANGELOG.md for version history.
+
+---
+
+*Powered by Azure Cloud Infrastructure*
