@@ -1,139 +1,184 @@
-[Glassdoor Scraper](https://apify.com/alizarin_refrigerator-owner/glassdoor-scraper?fpr=data)
+[Glassdoor Scraper](https://apify.com/cryptosignals/glassdoor-scraper?fpr=data)
 
-Scrape Glassdoor for company reviews, salaries, interview experiences, and CEO approval ratings. Look up any company by domain/website URL — no need to find the Glassdoor page yourself. For HR research, employer branding, salary benchmarking, and competitive intelligence.
+# Glassdoor Scraper — Jobs, Reviews & Salary Data
 
-**BYOK (Bring Your Own Key)** -- you provide your own API credentials.
+Scrape Glassdoor job listings, company reviews, and salary data at scale — **no login required**. Search by keyword, location, or company name. Extract job titles, salaries, ratings, pros/cons, and more.
 
----
+## Why Use This Glassdoor Scraper?
 
-## Before You Start
+Glassdoor is the largest employer review platform, with millions of salary reports and company reviews. Whether you're benchmarking compensation, monitoring employer brand sentiment, or analyzing hiring trends — this scraper gives you structured data without needing a Glassdoor account.
 
-This actor requires your own API credentials to fetch real data.
+**No login required.** No Glassdoor account needed. The scraper uses Playwright with stealth mode to extract data from publicly accessible pages.
 
-**Where to get your key:** JSON array of cookies from Cookie-Editor. Helps bypass Glassdoor login walls and paywalls.
+## Features
 
-You can test with **Demo Mode** first (free, no key needed) to see the output format before committing.
-
----
-
-## Quick Start
-
-### Test with Demo Mode (free, no API key needed)
-
-```
-{
-  "demoMode": true,
-  "companyUrl": "https://example.com",
-  "companyDomain": [
-    "example.com"
-  ]
-}
-```
-
-### Run with real data
-
-```
-{
-  "demoMode": false,
-  "scrapeType": "company_profile",
-  "companyUrl": "https://example.com",
-  "companyDomain": [
-    "competitor1.com",
-    "competitor2.com"
-  ],
-  "companySize": "any",
-  "includeReviews": true,
-  "maxReviewsPerCompany": 25,
-  "includeSalaries": true,
-  "includeInterviews": false,
-  "reviewFilter": "all",
-  "sortBy": "date",
-  "maxResults": 50,
-  "sessionCookies": "YOUR_API_KEY_HERE",
-  "webhookPlatform": "custom",
-  "cookieKvStoreName": "cookie-sessions"
-}
-```
-
----
+- **Job listings** — Title, company, location, salary range, rating, posting date
+- **Company reviews** — Reviewer title, overall rating, pros, cons, sub-ratings (work-life balance, compensation, career opportunities, culture, management)
+- **Both modes** — Scrape jobs and reviews in a single run
+- **Salary extraction** — Salary ranges where available
+- **Sorting** — Sort by relevance, date, salary (high/low), or rating
+- **Pagination** — Automatically follows pages to collect up to 500 results
+- **Stealth mode** — Uses Playwright with fingerprint evasion for reliable access
 
 ## Input Parameters
 
-| Parameter | Type | Default | Required | Description |
+| Parameter | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `scrapeType` | string | `"company_profile"` | No | Type of data to scrape |
-| `companyUrl` | string | - | No | Direct Glassdoor company page URL (e.g., [https://www.glassdoor.com/Overview/Working-at-Google-EI_IE9079.htm](https://www.glassdoor.com/Overview/Working-at-Google-EI_IE9079.htm)) |
-| `companyDomain` | string | - | No | Company website or domain to look up on Glassdoor (e.g., "stripe.com" or "[https://www.hubspot.com](https://www.hubspot.com)"). The actor resolves this to the correct Glassdoor page automatically. |
-| `companyName` | string | - | No | Company name to search for |
-| `location` | string | - | No | Filter by location (city, state, or country) |
-| `industry` | string | - | No | Filter by industry (Technology, Healthcare, Finance, etc.) |
-| `companySize` | string | `"any"` | No | Filter by company size |
-| `minRating` | number | - | No | Minimum overall rating (1.0-5.0) |
-| `includeReviews` | boolean | `true` | No | Scrape employee reviews |
-| `maxReviewsPerCompany` | integer | `25` | No | Maximum reviews to collect per company |
-| `includeSalaries` | boolean | `true` | No | Scrape salary information |
-| `includeInterviews` | boolean | `false` | No | Scrape interview experiences |
-| `reviewFilter` | string | `"all"` | No | Filter reviews by type |
-| `sortBy` | string | `"date"` | No | How to sort reviews |
-| `maxResults` | integer | `50` | No | Maximum number of companies to scrape |
-| `sessionCookies` | string | - | Yes* | JSON array of cookies from Cookie-Editor. Helps bypass Glassdoor login walls and paywalls. |
-| `proxyConfiguration` | object | - | No | Proxy settings for the scraper |
-| `demoMode` | boolean | `true` | No | Return sample data without actual scraping (for testing) |
-| `webhookUrl` | string | - | No | URL to POST results when scraping completes (Zapier, Make, n8n, custom endpoint) |
-| `webhookPlatform` | string | `"custom"` | No | Platform-specific payload formatting |
-| `webhookHeaders` | object | - | No | Custom HTTP headers to send with webhook (JSON object) |
-| `cookieStorageKey` | string | - | No | Key name to load cookies from the Cookie Manager KV store. If set and no manual sessionCookies are provided, the actor loads cookies from the named KV store automatically. Use this with the Cookie Manager actor for automated cookie rotation. |
-| `cookieKvStoreName` | string | `"cookie-sessions"` | No | Name of the Apify Key-Value store where Cookie Manager saves cookies. Defaults to 'cookie-sessions' if not set. |
+| `mode` | string | Yes | `jobs` | `jobs`, `reviews`, or `both` |
+| `keyword` | string | No | — | Job title or search term (e.g. `"data scientist"`) |
+| `location` | string | No | — | City/state/country (e.g. `"New York, NY"`) |
+| `companyName` | string | Conditional | — | Company name for reviews (required for `reviews` mode) |
+| `maxResults` | integer | No | `5` | Maximum results to return (1–500) |
+| `includeSalary` | boolean | No | `true` | Extract salary data when available |
+| `sortBy` | string | No | `relevance` | `relevance`, `date`, `salary_high`, `salary_low`, `rating` |
 
-*Required when Demo Mode is off.
+## Example Input
 
----
+### Search for Jobs
 
-## Pricing
+```
+{
+    "mode": "jobs",
+    "keyword": "software engineer",
+    "location": "San Francisco, CA",
+    "maxResults": 50,
+    "sortBy": "date"
+}
+```
 
-This actor uses **pay-per-event** billing:
+### Get Company Reviews
 
-| Event | Description | Price |
-| --- | --- | --- |
-| Actor Start | Base cost per run | $0.10 |
-| Company Scraped | Each Glassdoor company profile scraped | $0.08 |
-| Review Scraped | Each employee review extracted | $0.01 |
-| Salary Scraped | Each salary entry extracted | $0.01 |
-| Dataset Item | Each result stored in dataset | $0.00 |
+```
+{
+    "mode": "reviews",
+    "companyName": "Google",
+    "maxResults": 100
+}
+```
 
-**Demo mode is free** -- no charges for sample data.
+### Jobs + Reviews in One Run
 
----
+```
+{
+    "mode": "both",
+    "keyword": "product manager",
+    "companyName": "Meta",
+    "location": "New York, NY",
+    "maxResults": 30
+}
+```
 
-## Troubleshooting
+## Output Format
 
-### "API key is required"
+### Job Listing
 
-You have Demo Mode turned **off** but didn't provide an API key. Either:
+```
+{
+    "type": "job",
+    "title": "Senior Software Engineer",
+    "company": "Stripe",
+    "location": "San Francisco, CA",
+    "salary": "$180K - $250K (Glassdoor est.)",
+    "rating": 4.2,
+    "easyApply": true,
+    "postedDate": "2d ago",
+    "url": "https://www.glassdoor.com/job-listing/...",
+    "jobType": "Full-time"
+}
+```
 
-- Turn Demo Mode **on** to test with sample data
-- Add your API key in the input
+### Company Review
 
-### "API error 403" or "Unauthorized"
+```
+{
+    "type": "review",
+    "company": "Google",
+    "reviewerTitle": "Senior Software Engineer",
+    "overallRating": 4,
+    "pros": "Great compensation, smart colleagues, interesting problems",
+    "cons": "Bureaucracy in larger teams, slow promotion cycles",
+    "workLifeBalance": 4,
+    "compensation": 5,
+    "careerOpportunities": 3,
+    "culture": 4,
+    "management": 3,
+    "recommends": true,
+    "date": "2026-03-15"
+}
+```
 
-Your API key is invalid, expired, or doesn't have access to this specific API endpoint. Double-check your key and account permissions.
+## How to Use with Python
 
-### "API error 429" or "Rate limit"
+```
+from apify_client import ApifyClient
 
-Too many requests. Wait a minute and try again, or reduce the number of items per run.
+client = ApifyClient("YOUR_API_TOKEN")
 
-### No results or empty dataset
+# Search for data science jobs in NYC
+run = client.actor("cryptosignals/glassdoor-scraper").call(run_input={
+    "mode": "jobs",
+    "keyword": "data scientist",
+    "location": "New York, NY",
+    "maxResults": 30,
+    "sortBy": "salary_high",
+})
 
-Check the run log for error messages. Common causes:
+for job in client.dataset(run["defaultDatasetId"]).iterate_items():
+    print(f"{job['title']} at {job['company']} — {job.get('salary', 'N/A')}")
+```
 
-- Invalid input format (check the examples above)
-- API key without proper permissions
-- The target data doesn't exist or is too small to track
+```
+# Get company reviews for competitive analysis
+run = client.actor("cryptosignals/glassdoor-scraper").call(run_input={
+    "mode": "reviews",
+    "companyName": "Microsoft",
+    "maxResults": 50,
+})
 
-### How do I test without an API key?
+for review in client.dataset(run["defaultDatasetId"]).iterate_items():
+    print(f"{review['overallRating']}/5 — {review['pros'][:60]}...")
+```
 
-Enable **Demo Mode** in the input. This returns realistic sample data so you can verify the output format works for your workflow.
+## Use Cases
 
----
+- **Salary benchmarking** — Compare compensation across companies and locations for specific roles
+- **Competitive intelligence** — Monitor what competitors' employees say about culture, management, and compensation
+- **Job market analysis** — Track hiring trends, in-demand skills, and salary ranges by location
+- **Employer branding** — Understand how your company is perceived vs. competitors on Glassdoor
+- **HR & recruiting** — Benchmark salaries and identify companies with high turnover signals
+- **Due diligence** — Research employee sentiment before acquisitions, partnerships, or job offers
+- **Academic research** — Analyze workplace satisfaction trends across industries over time
 
-**Built by John Rippy | [Actor Arsenal](https://actorarsenal.com)**
+## Working Around Bot Detection
+
+Glassdoor uses aggressive bot detection including CAPTCHAs, session fingerprinting, and IP-based rate limiting. This scraper uses Playwright with stealth mode and Firefox fingerprinting to bypass basic detection, but for reliable results at scale you'll need residential proxies.
+
+[ThorData residential proxies](https://thordata.partnerstack.com/partner/0a0x4nzh) provide rotating residential IPs that make requests appear to come from real browsers — essential for Glassdoor which aggressively blocks datacenter IPs. Configure them in the actor's proxy settings for consistent, reliable scraping.
+
+**Tips for reliable Glassdoor scraping:**
+
+- Always use residential proxies (datacenter IPs are blocked quickly)
+- Keep `maxResults` under 100 for the most reliable results
+- Space out runs — avoid hitting the same search multiple times per hour
+- Use the `both` mode to get jobs and reviews in a single run instead of two separate runs
+
+## Integrations
+
+- **Google Sheets** — Export salary and review data to spreadsheets
+- **Zapier / Make.com** — Get alerts when new jobs match your criteria
+- **Slack** — Notify recruiting teams about new job postings
+- **API** — Call programmatically from any language using the Apify API
+
+## FAQ
+
+**Is this legal?**
+This scraper accesses publicly visible pages on Glassdoor. Always review Glassdoor's Terms of Service and your local laws before scraping.
+
+**Do I need a Glassdoor account?**
+No. The scraper accesses publicly visible job listings and review pages without logging in.
+
+**Why do some runs return fewer results than expected?**
+Glassdoor's bot detection may block some requests. Using residential proxies significantly improves reliability. Keep `maxResults` reasonable and space out your runs.
+
+**Can I scrape salary data separately?**
+Salary data is included in job results when `includeSalary` is enabled (it is by default). There is no separate salary-only mode.
