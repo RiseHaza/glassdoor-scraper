@@ -1,184 +1,131 @@
-[Glassdoor Scraper](https://apify.com/cryptosignals/glassdoor-scraper?fpr=data)
+[Glassdoor Scraper](https://apify.com/swerve/glassdoor-scraper?fpr=data)
 
-# Glassdoor Scraper — Jobs, Reviews & Salary Data
+# Glassdoor Job Scraper
 
-Scrape Glassdoor job listings, company reviews, and salary data at scale — **no login required**. Search by keyword, location, or company name. Extract job titles, salaries, ratings, pros/cons, and more.
+Scrape job listings from [Glassdoor](https://www.glassdoor.com) with salary estimates, company ratings, full job descriptions, and more. Supports 21 countries with automatic domain health checks and fallback.
 
-## Why Use This Glassdoor Scraper?
+## Why This Scraper?
 
-Glassdoor is the largest employer review platform, with millions of salary reports and company reviews. Whether you're benchmarking compensation, monitoring employer brand sentiment, or analyzing hiring trends — this scraper gives you structured data without needing a Glassdoor account.
-
-**No login required.** No Glassdoor account needed. The scraper uses Playwright with stealth mode to extract data from publicly accessible pages.
-
-## Features
-
-- **Job listings** — Title, company, location, salary range, rating, posting date
-- **Company reviews** — Reviewer title, overall rating, pros, cons, sub-ratings (work-life balance, compensation, career opportunities, culture, management)
-- **Both modes** — Scrape jobs and reviews in a single run
-- **Salary extraction** — Salary ranges where available
-- **Sorting** — Sort by relevance, date, salary (high/low), or rating
-- **Pagination** — Automatically follows pages to collect up to 500 results
-- **Stealth mode** — Uses Playwright with fingerprint evasion for reliable access
-
-## Input Parameters
-
-| Parameter | Type | Required | Default | Description |
-| --- | --- | --- | --- | --- |
-| `mode` | string | Yes | `jobs` | `jobs`, `reviews`, or `both` |
-| `keyword` | string | No | — | Job title or search term (e.g. `"data scientist"`) |
-| `location` | string | No | — | City/state/country (e.g. `"New York, NY"`) |
-| `companyName` | string | Conditional | — | Company name for reviews (required for `reviews` mode) |
-| `maxResults` | integer | No | `5` | Maximum results to return (1–500) |
-| `includeSalary` | boolean | No | `true` | Extract salary data when available |
-| `sortBy` | string | No | `relevance` | `relevance`, `date`, `salary_high`, `salary_low`, `rating` |
-
-## Example Input
-
-### Search for Jobs
-
-```
-{
-    "mode": "jobs",
-    "keyword": "software engineer",
-    "location": "San Francisco, CA",
-    "maxResults": 50,
-    "sortBy": "date"
-}
-```
-
-### Get Company Reviews
-
-```
-{
-    "mode": "reviews",
-    "companyName": "Google",
-    "maxResults": 100
-}
-```
-
-### Jobs + Reviews in One Run
-
-```
-{
-    "mode": "both",
-    "keyword": "product manager",
-    "companyName": "Meta",
-    "location": "New York, NY",
-    "maxResults": 30
-}
-```
-
-## Output Format
-
-### Job Listing
-
-```
-{
-    "type": "job",
-    "title": "Senior Software Engineer",
-    "company": "Stripe",
-    "location": "San Francisco, CA",
-    "salary": "$180K - $250K (Glassdoor est.)",
-    "rating": 4.2,
-    "easyApply": true,
-    "postedDate": "2d ago",
-    "url": "https://www.glassdoor.com/job-listing/...",
-    "jobType": "Full-time"
-}
-```
-
-### Company Review
-
-```
-{
-    "type": "review",
-    "company": "Google",
-    "reviewerTitle": "Senior Software Engineer",
-    "overallRating": 4,
-    "pros": "Great compensation, smart colleagues, interesting problems",
-    "cons": "Bureaucracy in larger teams, slow promotion cycles",
-    "workLifeBalance": 4,
-    "compensation": 5,
-    "careerOpportunities": 3,
-    "culture": 4,
-    "management": 3,
-    "recommends": true,
-    "date": "2026-03-15"
-}
-```
-
-## How to Use with Python
-
-```
-from apify_client import ApifyClient
-
-client = ApifyClient("YOUR_API_TOKEN")
-
-# Search for data science jobs in NYC
-run = client.actor("cryptosignals/glassdoor-scraper").call(run_input={
-    "mode": "jobs",
-    "keyword": "data scientist",
-    "location": "New York, NY",
-    "maxResults": 30,
-    "sortBy": "salary_high",
-})
-
-for job in client.dataset(run["defaultDatasetId"]).iterate_items():
-    print(f"{job['title']} at {job['company']} — {job.get('salary', 'N/A')}")
-```
-
-```
-# Get company reviews for competitive analysis
-run = client.actor("cryptosignals/glassdoor-scraper").call(run_input={
-    "mode": "reviews",
-    "companyName": "Microsoft",
-    "maxResults": 50,
-})
-
-for review in client.dataset(run["defaultDatasetId"]).iterate_items():
-    print(f"{review['overallRating']}/5 — {review['pros'][:60]}...")
-```
+- **Salary data that Glassdoor hides** -- estimated salary range (min, median, max) for each listing, extracted from Glassdoor's internal data
+- **Full job descriptions** -- optionally fetch the complete description for every listing (enable `fetchDescriptions`)
+- **21 countries** -- dedicated Glassdoor domains for US, UK, Canada, Germany, Australia, and more
+- **Smart fallback** -- if a country domain is temporarily down, the scraper automatically falls back to glassdoor.com so your run still produces results
+- **In-browser location resolution** -- your location filter is resolved to Glassdoor's internal location ID for accurate results
+- **Rich filtering** -- filter by job type, date posted, remote-only, and minimum salary
 
 ## Use Cases
 
-- **Salary benchmarking** — Compare compensation across companies and locations for specific roles
-- **Competitive intelligence** — Monitor what competitors' employees say about culture, management, and compensation
-- **Job market analysis** — Track hiring trends, in-demand skills, and salary ranges by location
-- **Employer branding** — Understand how your company is perceived vs. competitors on Glassdoor
-- **HR & recruiting** — Benchmark salaries and identify companies with high turnover signals
-- **Due diligence** — Research employee sentiment before acquisitions, partnerships, or job offers
-- **Academic research** — Analyze workplace satisfaction trends across industries over time
+- **Recruiters and staffing agencies** pulling fresh job postings across 21 countries to source leads, identify hiring companies, and benchmark against competitors
+- **HR and compensation analysts** using Glassdoor's hidden salary estimates to build pay bands and benchmark offers for specific roles and cities
+- **Job seekers and career coaches** monitoring new postings at target companies with custom filters (remote, fulltime, posted this week)
+- **Sales teams at HR tech vendors** generating leads by tracking which companies are hiring in high volume (signals growth/budget)
+- **Market researchers** studying labour demand trends, remote work share, and industry hiring shifts across US, UK, Germany, and more
+- **Competitive intelligence teams** tracking how competitors describe roles, benefits, and culture in live listings
 
-## Working Around Bot Detection
+## Proxy Required
 
-Glassdoor uses aggressive bot detection including CAPTCHAs, session fingerprinting, and IP-based rate limiting. This scraper uses Playwright with stealth mode and Firefox fingerprinting to bypass basic detection, but for reliable results at scale you'll need residential proxies.
+You **must** use Apify Proxy with the **RESIDENTIAL** group. Glassdoor will block requests from datacenter IPs.
 
-[ThorData residential proxies](https://thordata.partnerstack.com/partner/0a0x4nzh) provide rotating residential IPs that make requests appear to come from real browsers — essential for Glassdoor which aggressively blocks datacenter IPs. Configure them in the actor's proxy settings for consistent, reliable scraping.
+```
+{
+  "proxyConfig": {
+    "useApifyProxy": true,
+    "apifyProxyGroups": ["RESIDENTIAL"]
+  }
+}
+```
 
-**Tips for reliable Glassdoor scraping:**
+## Input
 
-- Always use residential proxies (datacenter IPs are blocked quickly)
-- Keep `maxResults` under 100 for the most reliable results
-- Space out runs — avoid hitting the same search multiple times per hour
-- Use the `both` mode to get jobs and reviews in a single run instead of two separate runs
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `searchQuery` | string | *(required)* | Job search keywords (e.g. `"Product Manager"`) |
+| `location` | string |  | City or region to filter by (e.g. `"New York"`) |
+| `country` | string | `"us"` | Country code -- see supported list below |
+| `maxItems` | integer | `100` | Maximum number of listings to return (max 1000) |
+| `jobType` | string | `"all"` | One of: `all`, `fulltime`, `parttime`, `contract`, `internship`, `temporary` |
+| `datePosted` | integer |  | Only jobs posted within this many days: `1`, `3`, `7`, `14`, or `30` |
+| `remoteOnly` | boolean | `false` | Only return remote positions |
+| `minSalary` | number |  | Minimum salary filter |
+| `fetchDescriptions` | boolean | `false` | Fetch full job descriptions (slower but much richer data) |
+| `proxyConfig` | object |  | Proxy settings -- residential proxy required |
 
-## Integrations
+## Supported Countries
 
-- **Google Sheets** — Export salary and review data to spreadsheets
-- **Zapier / Make.com** — Get alerts when new jobs match your criteria
-- **Slack** — Notify recruiting teams about new job postings
-- **API** — Call programmatically from any language using the Apify API
+| Code | Country | Domain |
+| --- | --- | --- |
+| `us` | United States | glassdoor.com |
+| `uk` | United Kingdom | glassdoor.co.uk |
+| `canada` | Canada | glassdoor.ca |
+| `india` | India | glassdoor.co.in |
+| `australia` | Australia | glassdoor.com.au |
+| `germany` | Germany | glassdoor.de |
+| `france` | France | glassdoor.fr |
+| `netherlands` | Netherlands | glassdoor.nl |
+| `austria` | Austria | glassdoor.at |
+| `mexico` | Mexico | glassdoor.com.mx |
+| `brazil` | Brazil | glassdoor.com.br |
+| `belgium` | Belgium | glassdoor.be |
+| `switzerland` | Switzerland | glassdoor.ch |
+| `ireland` | Ireland | glassdoor.ie |
+| `singapore` | Singapore | glassdoor.sg |
+| `hong-kong` | Hong Kong | glassdoor.com.hk |
+| `new-zealand` | New Zealand | glassdoor.co.nz |
+| `israel` | Israel | glassdoor.co.il |
+| `italy` | Italy | glassdoor.it |
+| `spain` | Spain | glassdoor.es |
+| `sweden` | Sweden | glassdoor.se |
 
-## FAQ
+> **Note:** Israel (`glassdoor.co.il`) is temporarily unavailable due to Glassdoor infrastructure issues. The scraper will automatically fall back to `glassdoor.com` when this domain is down.
 
-**Is this legal?**
-This scraper accesses publicly visible pages on Glassdoor. Always review Glassdoor's Terms of Service and your local laws before scraping.
+## Example Input
 
-**Do I need a Glassdoor account?**
-No. The scraper accesses publicly visible job listings and review pages without logging in.
+```
+{
+  "searchQuery": "Product Manager",
+  "location": "New York",
+  "country": "us",
+  "maxItems": 50,
+  "fetchDescriptions": true,
+  "proxyConfig": {
+    "useApifyProxy": true,
+    "apifyProxyGroups": ["RESIDENTIAL"]
+  }
+}
+```
 
-**Why do some runs return fewer results than expected?**
-Glassdoor's bot detection may block some requests. Using residential proxies significantly improves reliability. Keep `maxResults` reasonable and space out your runs.
+## Sample Output
 
-**Can I scrape salary data separately?**
-Salary data is included in job results when `includeSalary` is enabled (it is by default). There is no separate salary-only mode.
+```
+{
+  "jobId": "1009428351674",
+  "url": "https://www.glassdoor.com/job-listing/product-manager-acme-corp-JV_IC1132348_KO0,15_KE16,25.htm?jl=1009428351674",
+  "jobTitle": "Product Manager",
+  "employerName": "Acme Corp",
+  "employerId": "28471",
+  "location": "New York, NY",
+  "jobType": "fulltime",
+  "isRemote": false,
+  "salaryMin": 120000,
+  "salaryMedian": 145000,
+  "salaryMax": 175000,
+  "salaryCurrency": "USD",
+  "salaryPeriod": "ANNUAL",
+  "datePosted": "2026-03-24",
+  "easyApply": true,
+  "sponsored": false,
+  "companyRating": 4.2,
+  "companySize": "1001 to 5000 Employees",
+  "companyIndustry": "Internet & Web Services",
+  "listingDescription": "We are looking for a Product Manager to lead our platform team...",
+  "scrapedAt": "2026-03-26T12:00:00.000Z"
+}
+```
+
+## How It Works
+
+The scraper uses Playwright (headless Chrome) to render Glassdoor pages, then extracts structured data from the Apollo GraphQL cache embedded in each page. This gives richer and more reliable data than HTML scraping alone.
+
+## Keywords
+
+Glassdoor scraper, Glassdoor jobs API, salary data scraper, job listings API, Glassdoor salary estimates, recruitment data, HR benchmarking tool, global job market data, Glassdoor companies, remote jobs scraper, glassdoor.com scraper, job posting data
